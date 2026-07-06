@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#17120d" />
+  <title>AthenaZoom Desk</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="assets/icon.svg" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app" class="app build-mode">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">Α</div>
+        <div class="brand-copy">
+          <input id="projectTitle" class="project-title-input" value="AthenaZoom Desk" aria-label="Titolo progetto" />
+          <input id="projectSubtitle" class="project-subtitle-input" value="Costruisci percorsi, proietta mappe vive" aria-label="Sottotitolo progetto" />
+        </div>
+      </div>
+      <div class="mode-switch" role="group" aria-label="Modalità">
+        <button id="buildModeBtn" class="mode-btn active" type="button">Costruzione</button>
+        <button id="presentModeBtn" class="mode-btn" type="button">Proiezione</button>
+      </div>
+      <div class="top-actions">
+        <button id="saveBtn" class="ghost" type="button">Salva</button>
+        <button id="exportBtn" class="ghost" type="button">Esporta</button>
+        <label class="ghost file-label">Importa
+          <input id="importInput" type="file" accept="application/json,.json" />
+        </label>
+        <button id="helpBtn" class="ghost round" type="button" aria-label="Aiuto">?</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside id="toolPanel" class="tool-panel" aria-label="Strumenti di costruzione">
+        <section>
+          <h2>Strumenti</h2>
+          <div class="tool-grid">
+            <button id="selectTool" class="tool active" type="button" data-tool="select">Seleziona</button>
+            <button id="panTool" class="tool" type="button" data-tool="pan">Muovi spazio</button>
+            <button id="connectTool" class="tool" type="button" data-tool="connect">Connetti</button>
+          </div>
+        </section>
+
+        <section>
+          <h2>Aggiungi</h2>
+          <button id="addTextBtn" class="wide primary" type="button">Scheda testo</button>
+          <button id="addLinkBtn" class="wide" type="button">Link web</button>
+          <label class="wide file-wide">Immagine / PDF / DOC
+            <input id="assetInput" type="file" accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt" />
+          </label>
+        </section>
+
+        <section>
+          <h2>Connettore</h2>
+          <label>Colore
+            <input id="edgeColorDefault" type="color" value="#c99a48" />
+          </label>
+          <label>Spessore
+            <input id="edgeWidthDefault" type="range" min="1" max="16" value="5" />
+          </label>
+          <label>Stile
+            <select id="edgeStyleDefault">
+              <option value="solid">continuo</option>
+              <option value="dashed">tratteggiato</option>
+              <option value="dotted">puntinato</option>
+            </select>
+          </label>
+          <p id="connectHint" class="hint">Tocca “Connetti”, poi scegli due oggetti.</p>
+        </section>
+
+        <section>
+          <h2>Vista</h2>
+          <div class="tool-grid three">
+            <button id="zoomOutBtn" class="tool" type="button">−</button>
+            <button id="fitBtn" class="tool" type="button">Tutto</button>
+            <button id="zoomInBtn" class="tool" type="button">+</button>
+          </div>
+        </section>
+      </aside>
+
+      <section id="stage" class="stage" aria-label="Desk zoomabile">
+        <div id="viewport" class="viewport">
+          <div id="canvas" class="canvas">
+            <svg id="edgeLayer" class="edge-layer" xmlns="http://www.w3.org/2000/svg"></svg>
+            <div id="nodeLayer" class="node-layer"></div>
+          </div>
+        </div>
+        <div class="projection-hud" id="projectionHud">
+          <button id="prevBtn" type="button">← Indietro</button>
+          <button id="overviewBtn" type="button">Vista generale</button>
+          <button id="nextBtn" class="primary" type="button">Avanti →</button>
+        </div>
+      </section>
+
+      <aside id="inspector" class="inspector" aria-label="Pannello proprietà">
+        <div id="emptyInspector" class="empty-inspector">
+          <h2>Desk di costruzione</h2>
+          <p>Seleziona un oggetto o un connettore. Puoi trascinare gli elementi, zoomare con due dita e costruire il percorso di proiezione.</p>
+        </div>
+
+        <form id="nodeInspector" class="hidden inspector-form">
+          <h2>Oggetto</h2>
+          <label>Titolo
+            <input id="nodeTitle" type="text" />
+          </label>
+          <label>Testo / appunti
+            <textarea id="nodeBody" rows="7"></textarea>
+          </label>
+          <div class="two-cols">
+            <label>Colore
+              <input id="nodeColor" type="color" />
+            </label>
+            <label>Icona
+              <input id="nodeIcon" type="text" maxlength="4" />
+            </label>
+          </div>
+          <div class="two-cols">
+            <label>Larghezza
+              <input id="nodeWidth" type="number" min="160" max="900" step="10" />
+            </label>
+            <label>Altezza minima
+              <input id="nodeHeight" type="number" min="120" max="900" step="10" />
+            </label>
+          </div>
+          <label id="urlRow">Link / sorgente
+            <input id="nodeUrl" type="url" placeholder="https://…" />
+          </label>
+          <div class="button-row">
+            <button id="addToPathBtn" type="button">Aggiungi al percorso</button>
+            <button id="duplicateNodeBtn" type="button">Duplica</button>
+            <button id="deleteNodeBtn" class="danger" type="button">Elimina</button>
+          </div>
+        </form>
+
+        <form id="edgeInspector" class="hidden inspector-form">
+          <h2>Connettore</h2>
+          <label>Etichetta
+            <input id="edgeLabel" type="text" />
+          </label>
+          <label>Colore
+            <input id="edgeColor" type="color" />
+          </label>
+          <label>Spessore
+            <input id="edgeWidth" type="range" min="1" max="18" />
+          </label>
+          <label>Stile
+            <select id="edgeStyle">
+              <option value="solid">continuo</option>
+              <option value="dashed">tratteggiato</option>
+              <option value="dotted">puntinato</option>
+            </select>
+          </label>
+          <button id="deleteEdgeBtn" class="danger" type="button">Elimina connettore</button>
+        </form>
+
+        <section class="path-box">
+          <h2>Percorso di proiezione</h2>
+          <ol id="pathList" class="path-list"></ol>
+          <div class="button-row">
+            <button id="clearPathBtn" type="button">Svuota</button>
+            <button id="playFromStartBtn" class="primary" type="button">Proietta</button>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <dialog id="focusDialog" class="focus-dialog">
+    <article class="focus-card">
+      <button id="closeFocusBtn" class="close" type="button" aria-label="Chiudi">×</button>
+      <div id="focusContent"></div>
+    </article>
+  </dialog>
+
+  <dialog id="linkDialog" class="small-dialog">
+    <form method="dialog" id="linkForm" class="dialog-card">
+      <button class="close" value="cancel" aria-label="Chiudi">×</button>
+      <h2>Nuovo link</h2>
+      <label>Titolo
+        <input id="linkTitleInput" type="text" value="Nuovo link" />
+      </label>
+      <label>Indirizzo web
+        <input id="linkUrlInput" type="url" placeholder="https://…" />
+      </label>
+      <menu>
+        <button value="cancel" type="button" id="cancelLinkBtn">Annulla</button>
+        <button value="default" class="primary" type="submit">Crea</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="helpDialog" class="small-dialog">
+    <form method="dialog" class="dialog-card help-card">
+      <button class="close" value="close" aria-label="Chiudi">×</button>
+      <h2>AthenaZoom Desk</h2>
+      <p><strong>Costruzione:</strong> aggiungi schede, immagini, PDF, documenti e link; trascina gli oggetti; crea connettori con colori, spessori e stili diversi.</p>
+      <p><strong>Proiezione:</strong> naviga con Avanti/Indietro, muoviti liberamente nello spazio, usa pinch/zoom su iPad e tocca un oggetto per ingrandirlo.</p>
+      <p><strong>Salvataggio:</strong> il progetto resta nel browser. Esporta un JSON per conservarlo o portarlo su un altro dispositivo.</p>
+      <p class="note">Nota: su iPad i file molto pesanti possono superare il limite del browser. Per PDF e immagini didattiche normali va bene.</p>
+    </form>
+  </dialog>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

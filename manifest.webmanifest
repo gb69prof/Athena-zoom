@@ -1,0 +1,13 @@
+{
+  "name": "AthenaZoom Desk",
+  "short_name": "AthenaZoom",
+  "description": "Desk zoomabile per costruire e proiettare percorsi didattici.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#17120d",
+  "theme_color": "#17120d",
+  "orientation": "any",
+  "icons": [
+    { "src": "assets/icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
